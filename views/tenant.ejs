@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UDEE room for rent</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Sour+Gummy:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style/styles.css" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  </head>
+
+  <body style="background-color: #8cb9bd">
+    <div
+      class="container m-4 text-center pt-2"
+      style="
+        background-color: #dae7e7;
+        border-radius: 8px;
+        box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+        width: 95%;
+        max-width: 95%;
+        height: 100%;
+        max-height: 95%;
+      "
+    >
+    <%- include('navbar.ejs') %>
+      <!-- Gallery -->
+        <div class="gallery-container row">
+          <!-- Main Image -->
+          <div class="col-lg-8 col-md-12 main-image-container">
+            <% if (data.gallery.length > 0) { %>
+              <img src="<%= data.gallery[0] %>" class="main-image">
+            <% } else { %>
+              <p class="text-center text-danger">ไม่มีรูปภาพ</p>
+            <% } %>
+          </div>
+
+          <!-- Sub Images -->
+          <div class="col-lg-4 col-md-12 sub-images-container">
+            <% data.gallery.slice(1, 5).forEach((pic) => { %>
+              <div class="sub-image-wrapper">
+                <img src="<%= pic %>" class="sub-image">
+              </div>
+            <% }); %>
+          </div>
+        </div>
+
+      <div class="col-md-5" style="margin-left: 7%;">
+          <h2 class="text-primary" style="text-align: left;"><%= data.dorm_name %></h2>
+          <p class="text-muted"></p>
+          <ul class="list-group mb-3">
+              <li class="list-group-item" style="text-align: left;font-family: 'Inter', sans-serif;"><strong>ที่อยู่หอพัก:</strong> <%= data.dorm_address %></li>
+              <li class="list-group-item" style="text-align: left;font-family: 'Inter', sans-serif;"><strong>จำนวนห้อง:</strong> <%= data.rooms.length %></li>
+              <li class="list-group-item" style="text-align: left;font-family: 'Inter', sans-serif;"><strong>ราคาเริ่มต้น:</strong> <%= data.rooms.length > 0 ? data.rooms[0].price : "N/A" %> บาท</li>
+              <% if (data.information.length > 0) { %>
+                <% data.information.forEach(info => { %>
+                    <li class="list-group-item" style="text-align: left;font-family: 'Inter', sans-serif;">- <%= info %></li>
+                <% }); %>
+            <% } else { %>
+                <li class="list-group-item text-muted" style="text-align: left;font-family: 'Inter', sans-serif;">ไม่มีข้อมูล</li>
+            <% } %>
+          </ul>
+      </div>
+      <div class="row mt-4" style="margin-left: 7%;margin-right: 7%;">
+        <div class="col-md-12">
+            <h3 class="text-primary" style="text-align: left;font-family: 'Inter', sans-serif;">หอพักนี้มีอะไรบ้าง</h3>
+            <table class="table table-bordered">
+                <tbody>
+                    <% data.facilities.forEach(facility => { %>
+                      <li class="list-group-item" style="text-align: left;font-family: 'Inter', sans-serif;"><strong><%= facility %></strong></li>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row mt-4" style="margin-left: 7%;margin-right: 7%;">
+        <div class="col-md-12">
+            <h3 class="text-primary" style="text-align: left;font-family: 'Inter', sans-serif;">รายการห้องพัก</h3>
+            <table class="table table-bordered table-light">
+                <thead class="table-primary">
+                    <tr>
+                        <th style="font-family: 'Inter', sans-serif;">ประเภทห้อง</th>
+                        <th style="font-family: 'Inter', sans-serif;">ราคา</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% data.rooms.forEach(room => { %>
+                        <tr>
+                            <td style="font-family: 'Inter', sans-serif;"><%= room.room_type %></td>
+                            <td style="font-family: 'Inter', sans-serif;"><%= room.price %> บาท</td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+  </div>
+    </body>
+</html>

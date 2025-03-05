@@ -1,0 +1,99 @@
+.map-wrapper {
+    position: relative;
+    display: inline-block;
+    padding: 20px; /* ระยะขอบด้านใน */
+    background-color: #eeeeee; /* สีพื้นหลังของกรอบ */
+    border: 15px solid #ff8800; /* กรอบสีส้ม */
+    border-radius: 20px; /* ทำให้มุมโค้ง */
+    margin-top: 50px;
+}
+
+#navbar {
+    position: sticky;
+    top: 0px;
+}
+
+.container-custom {
+    background: #f2f7f5;
+    padding: 20px;
+    border-radius: 8px;
+}
+.dorm-image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.dorm-image {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+.btn-book {
+    background-color: #dc3545;
+    color: white;
+    font-size: 1.2rem;
+    padding: 12px;
+    width: 100%;
+}
+.btn-book:hover {
+    background-color: #c82333;
+}
+.section-title {
+    color: #007bff;
+    font-weight: bold;
+    margin-top: 20px;
+    border-bottom: 3px solid #007bff;
+    display: inline-block;
+    padding-bottom: 5px;
+}
+.info-box {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+/* กำหนด flexbox ให้ภาพหลักและภาพเล็กอยู่ในโครงสร้างที่ต้องการ */
+.gallery-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px; /* ระยะห่างระหว่างรูป */
+    margin-top: 20px;
+}
+
+/* รูปหลัก */
+.main-image-container {
+    flex: 2; /* กำหนดให้รูปหลักใหญ่กว่า */
+    margin-left: 7%;
+    margin-right: 0px;
+}
+
+.main-image {
+    width: 100%;
+    height: 385px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* คอนเทนเนอร์ของรูปเล็ก */
+.sub-images-container {
+    flex: 1; /* กำหนดให้ภาพเล็กอยู่ฝั่งขวา */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 คอลัมน์ */
+    grid-template-rows: repeat(2, auto);  /* 2 แถว */
+    gap: 5px;
+    margin-right: 7%;
+}
+
+/* ปรับขนาดรูปเล็ก */
+.sub-image-wrapper {
+    width: 100%;
+    height: 190px;
+}
+
+.sub-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UDEE room for rent</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chonburi&display=swap" rel="stylesheet">
+</head>
+
+<body style="background-color: #8CB9BD;">
+    <div class="container m-4 text-center pt-2"
+        style="background-color: #DAE7E7; border-radius: 8px; box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);width: 95%; max-width: 95%; height: 95vh; max-height: 95%;">
+        <div class="nav-con container-fluid d-flex align-items-center p-2"
+            style="border-radius: 16px; background: #B6D2D5; box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25); width: 90%; max-width: 90%;">
+            <img src="/assets/logo.svg" alt="logo" width="100" height="auto" style="border-radius: 32px;"
+                draggable="false">
+            <div class="ms-auto">
+                <p class="mb-0">Welcome, <%= user.username %>!</p>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+              Dropdown button
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li><a class="dropdown-item" href="#">Action</a></li>
+              <li><a class="dropdown-item" href="#">Another action</a></li>
+              <li><a class="dropdown-item" href="#">Something else here</a></li>
+            </ul>
+          </div>
+    </div>
+    <!-- Bootstrap และ Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
