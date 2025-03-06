@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add dormitory information</title>
+    <style>
+        body {
+            font-family: 'Noto Sans Thai', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+        }
+
+        .container {
+            margin: 5px 5%;
+            max-width: 100%;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .section {
+            padding: 1% 2%;
+            margin: 5px 5%;
+            margin-bottom: 1%;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            display: flex;
+            gap: 20px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+
+        .form-item {
+            flex: 1;
+            min-width: 200px;
+            margin: 10px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .info {
+            font-size: 12px;
+            color: gray;
+            margin: 10px;
+        }
+
+        input[type="submit"] {
+            padding: 10px 20px;
+            background: #8CB9BD;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 15px;
+            width: auto;
+            display: inline-block;
+        }
+
+        button {
+            background: #ECB159;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            width: auto;
+            margin: 8px;
+            padding: 5px 10px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .preview-container img {
+            max-width: 250px;
+            max-height: 150px;
+            border: 1px solid #ccc;
+            padding: 5px;
+            object-fit: cover;
+        }
+
+        .facility-container, .information-container {
+            margin-bottom: 5px;
+        }
+
+        .facility-input, .information-input {
+            padding: 10px;
+            margin-bottom: 5px;
+            font-weight: 400;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .form-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('navbar_new_owner') %>
+        <div class="container">
+            <h2 style="text-align: center;">ข้อมูลหอพัก</h2>
+            <p style="text-align: center;">โปรดกรอกข้อมูลหอพักของคุณ</p>
+            <div class="section">
+                <form action="/add_dorm_info" method="post" id="myForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <div class="form-item">
+                            <label for="dorm-name">ชื่อหอพัก</label>
+                            <input type="text" maxlength="20" name="dormitory_name" id="dorm-name"
+                                placeholder="กรอกชื่อหอพัก" required>
+                        </div>
+                        <div class="form-item">
+                            <label for="dorm-phone">เบอร์โทรติดต่อหอพัก</label>
+                            <input type="tel" maxlength="10" pattern="^[0-9]\d*$" name="contact" id="dorm-phone"
+                                placeholder="กรอกเบอร์โทรติดต่อ" required>
+                        </div>
+                    </div>
+                    <!-- ช่องกรอกอีเมลติดต่อ -->
+                    <div class="form-item">
+                        <label for="dorm-email">อีเมลติดต่อหอพัก</label>
+                        <input type="email" maxlength="20" name="email" id="dorm-email" placeholder="กรอกอีเมลติดต่อ">
+                    </div>
+                    <div class="form-group">
+                        <div class="form-item">
+                            <label for="billing-date">กำหนดวันที่เก็บบิลประจำเดือน</label>
+                            <select id="billing-date" name="monthly_bill_date" required>
+                                <option value="0" disabled selected>เลือกวันที่</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                                <option value="13">13</option>
+                                <option value="14">14</option>
+                                <option value="15">15</option>
+                                <option value="16">16</option>
+                                <option value="17">17</option>
+                                <option value="18">18</option>
+                                <option value="19">19</option>
+                                <option value="20">20</option>
+                                <option value="21">21</option>
+                                <option value="22">22</option>
+                                <option value="23">23</option>
+                                <option value="24">24</option>
+                                <option value="25">25</option>
+                                <option value="26">26</option>
+                                <option value="27">27</option>
+                                <option value="28">28</option>
+                                <option value="29">29</option>
+                                <option value="30">30</option>
+                                <option value="31">31</option>
+                            </select>
+                        </div>
+                        <div class="form-item">
+                            <label for="payment-deadline">กำหนดวันที่สุดท้ายของการชำระเงิน</label>
+                            <select id="payment-deadline" name="bill_due_date">
+                                <option value="0" disabled selected>เลือกวันที่</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                                <option value="13">13</option>
+                                <option value="14">14</option>
+                                <option value="15">15</option>
+                                <option value="16">16</option>
+                                <option value="17">17</option>
+                                <option value="18">18</option>
+                                <option value="19">19</option>
+                                <option value="20">20</option>
+                                <option value="21">21</option>
+                                <option value="22">22</option>
+                                <option value="23">23</option>
+                                <option value="24">24</option>
+                                <option value="25">25</option>
+                                <option value="26">26</option>
+                                <option value="27">27</option>
+                                <option value="28">28</option>
+                                <option value="29">29</option>
+                                <option value="30">30</option>
+                                <option value="31">31</option>
+                            </select>
+                        </div>
+                    </div>
+                    <h3 style="border-radius: 6px;background: #E0F2F2; width: 10%;text-align: center; color: #8CB9BD;">
+                        ข้อมูลตึก</h3>
+                    <div class="form-group">
+                        <div class="form-item">
+                            <label for="total-floors">จำนวนชั้น</label>
+                            <input type="number" name="floor_count" pattern="^[0-9]\d*$" id="total-floors" value="1"
+                                required>
+                        </div>
+                    </div>
+
+                    <div id="floor-inputs" class="form-group"></div>
+                    <div class="info">
+                        ⓘ จำนวนห้อง (หากไม่มีให้ใส่ 0)
+                    </div>
+
+                    <h3 style="border-radius: 6px;background: #FFE8C6; width: 10%;text-align: center; color: #ECB159;">
+                        ที่อยู่หอพัก</h3>
+                    <div class="form-group">
+                        <div class="form-item full-width">
+                            <label for="dorm-address">ที่อยู่หอพัก</label>
+                            <input type="text" name="dorm_address" id="dorm-address"
+                                placeholder="บ้านเลขที่ / ซอย / ถนน" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-item">
+                            <label for="province">จังหวัด</label>
+                            <select name="province" id="province" required>
+                                <option value="0" disabled selected>เลือกจังหวัด</option>
+                                <option value="กรุงเทพมหานคร">กรุงเทพมหานคร</option>
+                                <option value="กระบี่">กระบี่ </option>
+                                <option value="กาญจนบุรี">กาญจนบุรี </option>
+                                <option value="กาฬสินธุ์">กาฬสินธุ์ </option>
+                                <option value="กำแพงเพชร">กำแพงเพชร </option>
+                                <option value="ขอนแก่น">ขอนแก่น</option>
+                                <option value="จันทบุรี">จันทบุรี</option>
+                                <option value="ฉะเชิงเทรา">ฉะเชิงเทรา </option>
+                                <option value="ชัยนาท">ชัยนาท </option>
+                                <option value="ชัยภูมิ">ชัยภูมิ </option>
+                                <option value="ชุมพร">ชุมพร </option>
+                                <option value="ชลบุรี">ชลบุรี </option>
+                                <option value="เชียงใหม่">เชียงใหม่ </option>
+                                <option value="เชียงราย">เชียงราย </option>
+                                <option value="ตรัง">ตรัง </option>
+                                <option value="ตราด">ตราด </option>
+                                <option value="ตาก">ตาก </option>
+                                <option value="นครนายก">นครนายก </option>
+                                <option value="นครปฐม">นครปฐม </option>
+                                <option value="นครพนม">นครพนม </option>
+                                <option value="นครราชสีมา">นครราชสีมา </option>
+                                <option value="นครศรีธรรมราช">นครศรีธรรมราช </option>
+                                <option value="นครสวรรค์">นครสวรรค์ </option>
+                                <option value="นราธิวาส">นราธิวาส </option>
+                                <option value="น่าน">น่าน </option>
+                                <option value="นนทบุรี">นนทบุรี </option>
+                                <option value="บึงกาฬ">บึงกาฬ</option>
+                                <option value="บุรีรัมย์">บุรีรัมย์</option>
+                                <option value="ประจวบคีรีขันธ์">ประจวบคีรีขันธ์ </option>
+                                <option value="ปทุมธานี">ปทุมธานี </option>
+                                <option value="ปราจีนบุรี">ปราจีนบุรี </option>
+                                <option value="ปัตตานี">ปัตตานี </option>
+                                <option value="พะเยา">พะเยา </option>
+                                <option value="พระนครศรีอยุธยา">พระนครศรีอยุธยา </option>
+                                <option value="พังงา">พังงา </option>
+                                <option value="พิจิตร">พิจิตร </option>
+                                <option value="พิษณุโลก">พิษณุโลก </option>
+                                <option value="เพชรบุรี">เพชรบุรี </option>
+                                <option value="เพชรบูรณ์">เพชรบูรณ์ </option>
+                                <option value="แพร่">แพร่ </option>
+                                <option value="พัทลุง">พัทลุง </option>
+                                <option value="ภูเก็ต">ภูเก็ต </option>
+                                <option value="มหาสารคาม">มหาสารคาม </option>
+                                <option value="มุกดาหาร">มุกดาหาร </option>
+                                <option value="แม่ฮ่องสอน">แม่ฮ่องสอน </option>
+                                <option value="ยโสธร">ยโสธร </option>
+                                <option value="ยะลา">ยะลา </option>
+                                <option value="ร้อยเอ็ด">ร้อยเอ็ด </option>
+                                <option value="ระนอง">ระนอง </option>
+                                <option value="ระยอง">ระยอง </option>
+                                <option value="ราชบุรี">ราชบุรี</option>
+                                <option value="ลพบุรี">ลพบุรี </option>
+                                <option value="ลำปาง">ลำปาง </option>
+                                <option value="ลำพูน">ลำพูน </option>
+                                <option value="เลย">เลย </option>
+                                <option value="ศรีสะเกษ">ศรีสะเกษ</option>
+                                <option value="สกลนคร">สกลนคร</option>
+                                <option value="สงขลา">สงขลา </option>
+                                <option value="สมุทรสาคร">สมุทรสาคร </option>
+                                <option value="สมุทรปราการ">สมุทรปราการ </option>
+                                <option value="สมุทรสงคราม">สมุทรสงคราม </option>
+                                <option value="สระแก้ว">สระแก้ว </option>
+                                <option value="สระบุรี">สระบุรี </option>
+                                <option value="สิงห์บุรี">สิงห์บุรี </option>
+                                <option value="สุโขทัย">สุโขทัย </option>
+                                <option value="สุพรรณบุรี">สุพรรณบุรี </option>
+                                <option value="สุราษฎร์ธานี">สุราษฎร์ธานี </option>
+                                <option value="สุรินทร์">สุรินทร์ </option>
+                                <option value="สตูล">สตูล </option>
+                                <option value="หนองคาย">หนองคาย </option>
+                                <option value="หนองบัวลำภู">หนองบัวลำภู </option>
+                                <option value="อำนาจเจริญ">อำนาจเจริญ </option>
+                                <option value="อุดรธานี">อุดรธานี </option>
+                                <option value="อุตรดิตถ์">อุตรดิตถ์ </option>
+                                <option value="อุทัยธานี">อุทัยธานี </option>
+                                <option value="อุบลราชธานี">อุบลราชธานี</option>
+                                <option value="อ่างทอง">อ่างทอง </option>
+                            </select>
+                        </div>
+                        <div class="form-item">
+                            <label for="district">ตำบล/แขวง</label>
+                            <input type="text" name="district" id="district" maxlength="50" placeholder="ตำบล/แขวง"
+                                required>
+                        </div>
+                        <div class="form-item">
+                            <label for="sub-district">อำเภอ/เขต</label>
+                            <input type="text" name="subdistrict" id="sub-district" maxlength="50"
+                                placeholder="อำเภอ/เขต" required>
+                        </div>
+                        <div class="form-item">
+                            <label for="zipcode">รหัสไปรษณีย์</label>
+                            <input type="text" maxlength="5" name="zip_code" id="zipcode"
+                                placeholder="รหัสไปรษณีย์" required>
+                        </div>
+                    </div>
+                    <h3 style="border-radius: 6px;background: #E0F2F2; width: 8%;text-align: center; color: #8CB9BD;">
+                        ธนาคาร</h3>
+                    <div class="form-item">
+                        <label for="bank_name">เลือกบัญชีธนาคาร</label>
+                        <select id="bank_name" name="bank_name" required>
+                            <option value="0" disabled selected>บัญชีธนาคาร</option>
+                            <option value="1">พร้อมเพย์</option>
+                            <option value="2">ธนาคารกรุงเทพ</option>
+                            <option value="3">ธนาคารกสิกรไทย</option>
+                            <option value="4">ธนาคารกรุงไทย</option>
+                            <option value="5">ธนาคารทหารไทยธนชาต</option>
+                            <option value="6">ธนาคารไทยพาณิชย์</option>
+                            <option value="7">ธนาคารกรุงศรีอยุธยา</option>
+                            <option value="8">ธนาคารออมสิน</option>
+                            <option value="9">ธนาคารอาคารสงเคราะห์</option>
+                            <option value="10">ธนาคารเพื่อการเกษตรและสหกรณ์การเกษตร</option>
+                            <option value="11">ธนาคารธนชาต</option>
+                            <option value="12">ธนาคารเกียรตินาคิน</option>
+                            <option value="13">ธนาคารซีไอเอ็มบีไทย</option>
+                            <option value="14">ธนาคารอิสลามแห่งประเทศไทย</option>
+                            <option value="15">ธนาคารทิสโก้</option>
+                            <option value="16">ธนาคารยูโอบี</option>
+                            <option value="17">ธนาคารแลนด์ แอนด์ เฮาส์</option>
+                            <option value="18">ธนาคารไอซีบีซี (ไทย)</option>
+                            <option value="19">ธนาคารไทยเครดิต</option>
+                        </select>
+
+                    </div>
+                    <div class="form-group">
+                        <div class="form-item">
+                            <label for="bank_account_name">ชื่อบัญชี</label>
+                            <input type="text" name="bank_account_name" id="bank_account_name" maxlength="60"
+                                placeholder="ชื่อบัญชี" required>
+                        </div>
+                        <div class="form-item">
+                            <label for="bank_account_number">เลขที่บัญชี</label>
+                            <input type="text" name="bank_account_number" id="bank_account_number" 
+                                maxlength="17" placeholder="เลขที่บัญชีธนาคาร" required>
+                        </div>
+                    </div>
+                    <h3 style="border-radius: 6px;background: #FFE8C6; width: 12%;text-align: center; color: #ECB159;">
+                        ข้อมูลเพิ่มเติม</h3>
+                    <div class="form-item">
+                        <label for="img">อัปโหลดรูปภาพหอพัก</label>
+                        <input type="file" name="image" id="fileInput" accept="image/*" multiple>
+                        <br><br>
+                        <div class="preview-container" id="previewContainer"></div>
+                    </div>
+                    <!-- ส่วนข้อมูลหอพัก -->
+                    <div class="form-item">
+                        <label for="information">ข้อมูลหอพัก</label>
+                        <div class="information-container" id="informationContainer">
+                            <!-- ช่อง input สำหรับใส่ข้อมูลหอพักจะถูกเพิ่มที่นี่ -->
+                        </div>
+                        <button type="button" onclick="addInformation()">เพิ่มข้อมูล</button>
+                    </div>
+                    <div class="form-item">
+                        <label for="facility">สิ่งอำนวยความสะดวกและบริการที่มี</label>
+                        <div class="facility-container" id="facilityContainer">
+                            <!-- ช่อง input สำหรับใส่ชื่อ facility จะถูกเพิ่มที่นี่ -->
+                        </div>
+                        <button type="button" onclick="addFacility()">เพิ่มข้อมูล</button>
+                    </div>
+
+                    <input type="submit" value="บันทึกข้อมูล">
+            </div>
+            </form>
+        </div>
+        </div>
+
+        <script>
+            document.getElementById("myForm").addEventListener("submit", function (event) {
+                console.log("Form ถูก submit แล้ว!");
+            });
+        </script>
+
+        <script>
+            // Start add floor ตามที่กรอกใน line 106 แสดงใน line 110 ------------------------------------------------
+            // ฟังก์ชันสร้างช่องกรอกจำนวนห้องแต่ละชั้นอัตโนมัติ ตามจำนวนชั้นที่กำหนด
+            function generateFloorInputs() {
+                const totalFloors = document.getElementById('total-floors').value;//ดึงค่าจำนวนชั้นที่กรอกมา
+                const floorInputsContainer = document.getElementById('floor-inputs');
+                floorInputsContainer.innerHTML = '';// เคลียร์ข้อมูลเก่าออก
+
+                for (let i = 1; i <= totalFloors; i++) {
+                    const formItem = document.createElement('div');
+                    formItem.className = 'form-item';
+
+                    const label = document.createElement('label');
+                    label.setAttribute('for', `floor-${i}`);
+                    label.textContent = `ชั้น ${i} *`;
+
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.pattern = '^[0-9]\d*$';
+                    input.name = `room_amount_floor_${i}`;
+                    input.id = `floor-${i}`;
+                    input.value = 0;
+                    input.required = true;
+
+                    formItem.appendChild(label);
+                    formItem.appendChild(input);
+                    floorInputsContainer.appendChild(formItem);
+                }
+            }
+            // เรียกใช้ฟังก์ชันเมื่อหน้าเว็บโหลดครั้งแรก
+            generateFloorInputs();
+            // กำหนดให้ฟังก์ชันทำงานเมื่อจำนวนชั้นเปลี่ยนแปลง
+            document.getElementById('total-floors').addEventListener('input', generateFloorInputs);
+            // End add floor ตามที่กรอกใน line 106 แสดงใน line 110 --------------------------------------------------
+            // Start add images line 318 --------------------------------------------------------------------------
+            document.getElementById("fileInput").addEventListener("change", function (event) {
+                const files = event.target.files;
+                const previewContainer = document.getElementById("previewContainer");
+
+                // ล้างภาพเก่าก่อนแสดงใหม่
+                previewContainer.innerHTML = "";
+
+                if (files.length > 0) {
+                    Array.from(files).forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            const img = document.createElement("img");
+                            img.src = e.target.result;
+                            previewContainer.appendChild(img);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+            });
+            // End add images line 318 --------------------------------------------------------------------------
+
+            //start add facility line 339 -----------------------------------------------------------------------
+            function addFacility() {
+                // สร้าง label และ input สำหรับ Facility ใหม่
+                var newFacilityDiv = document.createElement("div");
+                newFacilityDiv.classList.add("facility-input");  // เพิ่ม class สำหรับ div ใหม่
+
+                var label = document.createElement("label");
+                label.innerHTML = "สิ่งอำนวยความสะดวกหรือบริการ:";
+
+                var input = document.createElement("input");
+                input.type = "text";
+                input.name = "facility[]";  // ใช้ array สำหรับเก็บหลาย ๆ ค่า
+
+                newFacilityDiv.appendChild(label);
+                newFacilityDiv.appendChild(input);
+
+                // เพิ่ม div ใหม่ที่มี label และ input ไปยังส่วนของ form
+                document.getElementById("facilityContainer").appendChild(newFacilityDiv);
+            }
+
+            //End add facility line 339 -----------------------------------------------------------------------
+
+            // Start add information line 345 -------------------------------------------------------------------
+            // ฟังก์ชันสำหรับเพิ่มช่องกรอกข้อมูลหอพัก
+            function addInformation() {
+                var newInfoDiv = document.createElement("div");
+                newInfoDiv.classList.add("information-input");
+
+                var label = document.createElement("label");
+                label.innerHTML = "ข้อมูลหอพัก:";
+
+                var input = document.createElement("input");
+                input.type = "text";
+                input.name = "information[]";  // ใช้ array เพื่อเก็บหลายค่า
+
+                newInfoDiv.appendChild(label);
+                newInfoDiv.appendChild(input);
+
+                // เพิ่ม div ใหม่ที่มี label และ input ไปยังส่วนของ form
+                document.getElementById("informationContainer").appendChild(newInfoDiv);
+            }
+            // End add information line 345 -------------------------------------------------------------------
+        </script>
+</body>
+
+</html>

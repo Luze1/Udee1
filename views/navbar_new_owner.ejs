@@ -1,0 +1,81 @@
+<style>
+    *{
+        font-family: 'Noto Sans Thai', sans-serif;
+    }
+    nav {
+        background: #B6D2D5;
+        box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+        padding: 5px 5%;
+    }
+
+    .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 70px;
+        font-weight: bold;
+        color: white;
+        width: 100%;
+    }
+
+    .navbar a ,.user {
+        color: white;
+        text-decoration: none;
+        text-align: center;
+        padding: 0 25px;
+    }
+
+    .navbar a:hover, .user:hover {
+        height: 50px;
+        border-radius: 6px;
+        background: #ECB159;
+        padding-top: 30px;
+    }
+
+    .user {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        min-width: 100%;
+        margin-top: 5px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        right: 0;
+    }
+
+    .dropdown-content a {
+        margin: 5px;
+        color: black;
+        padding: 16px 5px;
+        text-decoration: none;
+        display: block;
+        font-weight: normal;
+    }
+
+    .dropdown-content a:hover {
+        background-color: #f1f1f1;
+        height: 0%;
+    }
+
+    .user:hover .dropdown-content {
+        display: block;
+    }
+
+</style>
+<nav class="nav">
+    <div class="navbar">
+        <a href="#">🏠 U-DEE</a>
+        <div class="user">
+            <a href="#">👤 username</a>
+            <div class="dropdown-content">
+                <a href="add_dorm">+ เพิ่มหอพัก</a>
+                <hr style="border-top: 1px solid #ccc;">
+                <a class="dropdown-item" href="/logout">Log Out</a>
+            </div>
+    </div>
+</nav> 
