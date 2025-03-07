@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tenant Contact Form</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 30px; /* เพิ่ม padding ให้ container */
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px; /* เพิ่มระยะห่างใต้หัวข้อ */
+        }
+
+        /* รูปแบบของ label */
+        label {
+            display: block;
+            margin-top: 15px; /* เพิ่มระยะห่างด้านบน */
+            font-weight: bold;
+            text-align: left;
+        }
+
+        /* Input และ Textarea */
+        input[type="text"], textarea, input[type="file"] {
+            width: calc(100% - 20px); /* ลดขนาดเล็กน้อยให้มีระยะห่าง */
+            padding: 12px; /* เพิ่ม padding ให้พอดี */
+            margin: 10px 0; /* เพิ่ม margin บน-ล่าง */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: #f0f8ff;
+            box-sizing: border-box; /* ป้องกันขยายเกินขอบ container */
+        }
+
+        textarea {
+            height: 120px; /* ขยาย textarea */
+            resize: vertical; /* อนุญาตให้ยืดขยายเฉพาะแนวตั้ง */
+        }
+
+        /* ปุ่มกด */
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px; /* เพิ่มระยะห่าง */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    
+    <div class="container">
+        <h2>Submit a Contact Request</h2>
+        <form action="/submit-contact" method="POST" enctype="multipart/form-data">
+            <label for="topic">Topic:</label>
+            <input type="text" id="topic" name="topic" required><br>
+            
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" required></textarea><br>
+            
+            <label for="picture">Upload Picture:</label>
+            <input type="file" id="picture" name="picture" accept="image/*"><br>
+            
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

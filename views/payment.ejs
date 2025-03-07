@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ชำระเงิน</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h2 class="text-center">ชำระเงิน</h2>
+        <div class="card mt-4 p-3">
+            <h5>บัญชีธนาคาร</h5>
+            <div class="d-flex align-items-center">
+                <img src="<%= bank.bank_pic %>" alt="<%= bank.bank_name %>" style="height: 50px;">
+                <div class="ms-3">
+                    <h6><%= bank.bank_name %></h6>
+                    <p>ชื่อบัญชี: <strong><%= bank.bank_account_name %></strong></p>
+                    <p>เลขที่บัญชี: <strong><%= bank.bank_account_number %></strong></p>
+                </div>
+            </div>
+        </div>
+        <form action="/confirm-payment" method="POST" enctype="multipart/form-data" class="mt-4">
+            <input type="hidden" name="bill_id" value="<%= bill_id %>">
+            <input type="hidden" name="bank_account_number" value="<%= bank.bank_account_number %>">
+
+            <div class="mb-3">
+                <label class="form-label">อัปโหลดสลิปโอนเงิน</label>
+                <input type="file" class="form-control" name="receipt" required>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">ยืนยันการชำระเงิน</button>
+        </form>
+    </div>
+</body>
+</html>

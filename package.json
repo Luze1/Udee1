@@ -1,0 +1,20 @@
+{
+  "name": "pjwebpro",
+  "version": "1.0.0",
+  "main": "resizemap.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "multer": "^1.4.5-lts.1",
+    "session": "^0.1.0",
+    "sqlite3": "^5.1.7"
+  }
+}

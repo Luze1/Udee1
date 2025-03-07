@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UDEE Room for Rent</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="style/styles.css" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  </head>
+
+  <body style="background-color: #8cb9bd">
+    <div
+      class="container m-4 text-center pt-2"
+      style="
+        background-color: #dae7e7;
+        border-radius: 8px;
+        box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+        width: 95%;
+        max-width: 95%;
+        height: 95vh;
+        max-height: 95%;
+      "
+    >
+    <%- include('navbar.ejs') %>
+      <div class="map-wrapper">
+        <img src="assets/map.png" usemap="#image-map" />
+        <map name="image-map">
+          <map name="image-map">
+            <area target="_self" alt="Building 1" href="tenant/D001" coords="30,31,141,155" shape="rect" />
+            <area target="_self" alt="Building 2" href="tenant/D002" coords="278,33,393,153" shape="rect" />
+            <area target="_self" alt="Building 3" href="tenant/D003" coords="494,31,604,153" shape="rect" />
+            <area target="_self" alt="Building 4" href="tenant/D004" coords="700,30,820,153" shape="rect" />
+            <area target="_self" alt="Building 5" href="tenant/D005" coords="28,228,142,346" shape="rect" />
+            <area target="_self" alt="Building 6" href="tenant/D006" coords="491,226,610,347" shape="rect" />
+            <area target="_self" alt="Building 7" href="tenant/D007" coords="702,226,822,347" shape="rect" />
+            <area target="_self" alt="Building 8" href="tenant/D008" coords="29,411,146,536" shape="rect" />
+            <area target="_self" alt="Building 9" href="tenant/D009" coords="489,410,613,536" shape="rect" />
+            <area target="_self" alt="Building 10" href="tenant/D010" coords="699,411,816,534" shape="rect" />
+        </map>
+    </div>    
+      </div>
+    </div>
+  </body>
+  <script src="resizemap.js"></script>
+  <script>
+    imageMapResize();
+  </script>
+</html>

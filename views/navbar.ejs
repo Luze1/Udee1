@@ -1,0 +1,20 @@
+<div class="nav-con container-fluid d-flex align-items-center p-2"
+            style="border-radius: 16px; background: #B6D2D5; box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25); width: 90%; max-width: 90%;">
+            <img src="/assets/logo.svg" alt="logo" width="100" height="auto" style="border-radius: 32px;"
+                draggable="false">
+        <div class="d-flex me-4 ms-auto">
+            <a href="/home"><button class="btn btn-warning m-1">หน้าหลัก</button></a>
+            <a href="/dorm"><button class="btn btn-warning m-1">หอพัก</button></a>
+            <a href="/tncontact"><button class="btn btn-warning m-1">ติดต่อ</button></a>
+            <a href="/bill"><button class="btn btn-warning m-1">ชำระบิล</button></a>
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle m-1" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bx bxs-user"><%= user ? user.username : "Guest" %></i>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="/logout">Log Out</a></li>
+                </ul>
+              </div>
+          </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>

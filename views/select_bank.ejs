@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เลือกบัญชีธนาคาร</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h2 class="text-center">กรุณาเลือกบัญชีธนาคาร</h2>
+        <div class="list-group mt-4">
+            <% banks.forEach(bank => { %>
+                <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                    onclick="selectBank('<%= bank.bank_account_number %>')">
+                    <img src="<%= bank.bank_pic %>" alt="<%= bank.bank_name %>" style="height: 40px;">
+                    <div class="ms-3">
+                        <strong><%= bank.bank_name %></strong> <br>
+                        <small>ชื่อบัญชี: <%= bank.bank_account_name %></small>
+                    </div>
+                    <i class="bx bx-chevron-right"></i>
+                </button>
+            <% }); %>
+        </div>
+    </div>
+
+    <script>
+        const billId = "<%= bill_id %>"; // ✅ รับค่า bill_id จาก server.js
+
+        function selectBank(bankAccountNumber) {
+            window.location.href = `/pay/${bankAccountNumber}/${billId}`;
+        }
+    </script>
+</body>
+</html>

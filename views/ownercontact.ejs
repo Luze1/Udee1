@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ประวัติการติดต่อ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        .contact-item {
+            display: flex;
+            align-items: stretch;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .contact-item a {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            width: 100%;
+        }
+
+        .status-bar {
+            width: 30px;
+            min-height: 100%;
+        }
+
+        .status-pending {
+            background-color: #ff6666;
+        }
+
+        .status-resolved {
+            background-color: #99ff99;
+        }
+
+        .content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            background-color: #ddeeff;
+            padding: 10px;
+        }
+
+        .topic {
+            background-color: #f0f8ff;
+            padding: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>ประวัติการติดต่อ</h2>
+        <% contacts.forEach(contact => { %>
+            <div class="contact-item">
+                <a href="/contact/<%= contact.contact_id %>">
+                    <div class="status-bar <%= contact.status === 'pending' ? 'status-pending' : 'status-resolved' %>"></div>
+                    <div class="content">
+                        <div class="header">
+                            <span>หอพัก <%= contact.dormitory_name %> ห้อง <%= contact.room_id %></span>
+                            <span><%= new Date(contact.date).toLocaleString('th-TH') %></span>
+                        </div>
+                        <div class="topic">
+                            <%= contact.topic %>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        <% }); %>
+    </div>
+</body>
+</html>
