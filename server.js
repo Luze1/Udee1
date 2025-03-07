@@ -1,12 +1,13 @@
-<<<<<<< Updated upstream
-<<<<<<< HEAD
 const express = require("express");
 const path = require("path");
 const port = 3000;
 const sqlite3 = require("sqlite3").verbose();
 const bodyParser = require("body-parser");
+const { v4: uuidv4 } = require('uuid');
 const session = require("express-session");
 const multer = require("multer");
+// ตั้งค่า multer สำหรับอัปโหลดไฟล์
+// Multer configuration for file upload
 const storage = multer.memoryStorage(); // เก็บไฟล์ในหน่วยความจำ (Buffer)
 const upload = multer({
   storage: storage,
@@ -662,9 +663,8 @@ app.post('/submit-contact', upload.single('picture'), (req, res) => {
 app.get('/add_bill', (req, res) => {
     res.render('bill_detail');
   });
-//Start usecase 2  เพิ่มข้อมูลหอพัก----------------------------------------------------------------------------------------
-// ตั้งค่า multer สำหรับอัปโหลดไฟล์
-// Multer configuration for file upload
+  
+///Start usecase 2  เพิ่มข้อมูลหอพัก----------------------------------------------------------------------------------------
 
 // Route for the add_dorm page
 app.get('/add_dorm', (req, res) => {
@@ -672,7 +672,6 @@ app.get('/add_dorm', (req, res) => {
 });
 
 app.post('/add_dorm_info', upload.array('image'), function (req, res) {
-  // รับค่าข้อมูลจากฟอร์ม
   let formdata = {
     dormitory_name: req.body.dormitory_name,
     contact: req.body.contact,
@@ -685,12 +684,13 @@ app.post('/add_dorm_info', upload.array('image'), function (req, res) {
     subdistrict: req.body.subdistrict,
     district: req.body.district,
     zip_code: req.body.zip_code,
-    bank_name: req.body.bank_name,  // รับค่าจากฟอร์ม
-    bank_account_name: req.body.bank_account_name,  // รับค่าจากฟอร์ม
-    bank_account_number: req.body.bank_account_number  // รับค่าจากฟอร์ม
+    bank_name: req.body.bank_name,
+    bank_account_name: req.body.bank_account_name,
+    bank_account_number: req.body.bank_account_number
   };
 
-  // ค้นหาค่าของ dormitory_id ล่าสุด (ใช้ฟอร์แมต D001, D002, D003)
+  let informationArray = req.body.information || []; // รับข้อมูล information[] จากฟอร์ม
+
   db.get("SELECT dormitory_id FROM dormitory ORDER BY dormitory_id DESC LIMIT 1", (err, row) => {
     if (err) {
       console.error("Error fetching last dormitory_id:", err);
@@ -704,7 +704,6 @@ app.post('/add_dorm_info', upload.array('image'), function (req, res) {
       dormitory_id = `D${(lastNumber + 1).toString().padStart(3, '0')}`;
     }
 
-    // สร้างคำสั่ง SQL สำหรับการเพิ่มข้อมูลหอพัก
     let sql = `INSERT INTO dormitory (dormitory_id, dormitory_name, contact, email, monthly_bill_date, bill_due_date, floor_count, dorm_address, province, subdistrict, district, zip_code) 
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
 
@@ -727,22 +726,7 @@ app.post('/add_dorm_info', upload.array('image'), function (req, res) {
         return res.send("Error inserting dormitory data.");
       }
 
-      // แสดงข้อมูลที่แทรกไปใน terminal
-      console.log("Dormitory Data Inserted Successfully:");
-      console.log({
-        dormitory_id: dormitory_id,
-        dormitory_name: formdata.dormitory_name,
-        contact: formdata.contact,
-        email: formdata.email,
-        monthly_bill_date: formdata.monthly_bill_date,
-        bill_due_date: formdata.bill_due_date,
-        floor_count: formdata.floor_count,
-        dorm_address: formdata.dorm_address,
-        province: formdata.province,
-        subdistrict: formdata.subdistrict,
-        district: formdata.district,
-        zip_code: formdata.zip_code
-      });
+      console.log("Dormitory Data Inserted Successfully:", formdata);
 
       // เพิ่มข้อมูลบัญชีธนาคาร
       let bankSql = `INSERT INTO bank (bank_account_number, bank_account_name, bank_name) VALUES (?, ?, ?);`;
@@ -756,13 +740,7 @@ app.post('/add_dorm_info', upload.array('image'), function (req, res) {
           return res.send("Error inserting bank data.");
         }
 
-        // แสดงข้อมูลบัญชีธนาคารที่แทรก
         console.log("Bank Data Inserted Successfully:");
-        console.log({
-          bank_account_number: formdata.bank_account_number,
-          bank_account_name: formdata.bank_account_name,
-          bank_name: formdata.bank_name
-        });
 
         // เพิ่มข้อมูลสิ่งอำนวยความสะดวก
         const facilities = req.body.facility || [];
@@ -770,7 +748,7 @@ app.post('/add_dorm_info', upload.array('image'), function (req, res) {
         const facilityValues = [];
 
         facilities.forEach(facility => {
-          const rawUUID = uuid.v4().replace(/-/g, '');
+          const rawUUID = uuidv4().replace(/-/g, '');
           const facilityID = `FAC-${rawUUID.slice(0, 8)}`;
           facilityInserts.push(`(?, ?, ?)`);
           facilityValues.push(facilityID, dormitory_id, facility);
@@ -786,25 +764,38 @@ app.post('/add_dorm_info', upload.array('image'), function (req, res) {
             }
 
             console.log("Facility Data Inserted Successfully:");
-            console.log(facilityValues);  // แสดงข้อมูลสิ่งอำนวยความสะดวกที่แทรก
 
-            // ตรวจสอบว่ามีการอัปโหลดรูปภาพ
+            // เพิ่มข้อมูล dormitory_info พร้อมกับข้อมูล information[]
+            let dormInfoSql = `INSERT INTO dormitory_info (dormitory_id, dorm_pic, information) VALUES (?, ?, ?);`;
+
             if (req.files && req.files.length > 0) {
-              req.files.forEach(file => {
-                const imageBuffer = file.buffer;
-                let imageSql = `INSERT INTO dormitory_info (dormitory_id, dorm_pic) VALUES (?, ?);`;
-                db.run(imageSql, [dormitory_id, imageBuffer], function (err) {
+              req.files.forEach((file, index) => {
+                let imageBuffer = file.buffer;
+                let informationText = informationArray[index] || ""; // ดึงข้อมูล information ตามลำดับของรูปภาพ
+
+                db.run(dormInfoSql, [dormitory_id, imageBuffer, informationText], function (err) {
                   if (err) {
-                    console.error("Error inserting image data:", err);
-                    return res.send("Error inserting image data.");
+                    console.error("Error inserting dormitory_info data:", err);
+                    return res.send("Error inserting dormitory_info data.");
                   }
                 });
               });
 
               res.redirect('/dorm');
             } else {
+              // ถ้าไม่มีรูปภาพแต่มี information[] ก็ต้องแทรกข้อมูล
+              if (informationArray.length > 0) {
+                informationArray.forEach(info => {
+                  db.run(dormInfoSql, [dormitory_id, null, info], function (err) {
+                    if (err) {
+                      console.error("Error inserting dormitory_info data:", err);
+                      return res.send("Error inserting dormitory_info data.");
+                    }
+                  });
+                });
+              }
+
               res.redirect('/dorm');
-              return res.send("No picture data.");
             }
           });
         } else {
@@ -815,7 +806,9 @@ app.post('/add_dorm_info', upload.array('image'), function (req, res) {
   });
 });
 
-//End usecase 2  เพิ่มข้อมูลหอพัก--------------------------------------------------------------------------------------------
+
+  //End usecase 2  เพิ่มข้อมูลหอพัก--------------------------------------------------------------------------------------------
+
 // 🟢 แสดงบิลของแต่ละห้อง
 app.get('/bills/:room_id', async (req, res) => {
   try {
@@ -898,4 +891,4 @@ app.post('/api/add-expense', async (req, res) => {
 app.listen(port, () => {
   console.log(`Starting node.js at port ${port}`);
 });
->>>>>>> Stashed changes
+
