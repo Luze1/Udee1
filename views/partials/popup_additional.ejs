@@ -1,9 +1,11 @@
-<!-- views/partials/addExpenseModal.ejs -->
+<!-- views/partials/popup_additional.ejs -->
 <div class="modal fade" id="addExpenseModal" tabindex="-1" aria-labelledby="addExpenseModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addExpenseModalLabel">เพิ่มรายการ (ห้อง <%= room_id %>)</h5>
+                <h5 class="modal-title" id="addExpenseModalLabel">
+                    เพิ่มรายการ (ห้อง <%= typeof room_id !== 'undefined' ? room_id : 'N/A' %>)
+                </h5>                
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -28,3 +30,5 @@
         </div>
     </div>
 </div>
+
+

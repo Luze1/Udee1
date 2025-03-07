@@ -1,0 +1,70 @@
+<!-- views/partials/popup_rent_water_elect_bill.ejs -->
+<div class="modal fade" id="addRentWaterElectModal" tabindex="-1" aria-labelledby="addRentWaterElectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addRentWaterElectModalLabel">บันทึกค่าน้ำ/ค่าไฟ (ห้อง <%= typeof room_id !== 'undefined' ? room_id : 'N/A' %>)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info" role="alert">
+                    ℹ️ กรุณากรอกเลขมิเตอร์ปัจจุบัน ระบบจะคำนวณค่าใช้จ่ายให้อัตโนมัติ
+                </div>
+                <form id="rentWaterElectForm">
+                    <div class="mb-3">
+                        <label for="rentFee" class="form-label">ค่าเช่า (บาท)</label>
+                        <input type="number" class="form-control" id="rentFee" required min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="waterMeter" class="form-label">เลขมิเตอร์น้ำ (หน่วย)</label>
+                        <input type="number" class="form-control" id="waterMeter" required min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="electricMeter" class="form-label">เลขมิเตอร์ไฟ (หน่วย)</label>
+                        <input type="number" class="form-control" id="electricMeter" required min="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                <button type="button" class="btn btn-success" onclick="saveRentWaterElect()">บันทึก</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function saveRentWaterElect() {
+        let rentFee = document.getElementById("rentFee").value;
+        let waterMeter = document.getElementById("waterMeter").value;
+        let electricMeter = document.getElementById("electricMeter").value;
+
+        if (!rentFee || !waterMeter || !electricMeter || rentFee < 0 || waterMeter < 0 || electricMeter < 0) {
+            alert("กรุณากรอกข้อมูลให้ครบถ้วน และจำนวนต้องไม่ติดลบ");
+            return;
+        }
+
+        let billData = {
+            rent_fee: parseFloat(rentFee),
+            water_meter: parseFloat(waterMeter),
+            electric_meter: parseFloat(electricMeter),
+            bill_id: "<%= data.length > 0 ? data[0].bill_id : '' %>"
+        };
+
+        fetch('/api/update-bill', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(billData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("อัปเดตค่าเช่า ค่าน้ำ ค่าไฟ สำเร็จ!");
+                window.location.reload();
+            } else {
+                alert("เกิดข้อผิดพลาด: " + data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
