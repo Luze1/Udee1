@@ -47,9 +47,10 @@
                 <div>
                     <button class="btn btn-warning me-2" data-bs-toggle="modal" data-bs-target="#addExpenseModal">📄
                         เพิ่มรายการ</button>
-                        <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addRentWaterElectModal">
-                            ⚡ บันทึกค่าน้ำ/ค่าไฟ
-                        </button>
+                    <button class="btn btn-primary me-2" data-bs-toggle="modal"
+                        data-bs-target="#addRentWaterElectModal">
+                        ⚡ บันทึกค่าน้ำ/ค่าไฟ
+                    </button>
                     <button class="btn btn-success">🪙ส่งบิล</button>
                 </div>
             </div>
@@ -72,22 +73,25 @@
                     <tbody>
                         <tr>
                             <td>ค่าเช่า</td>
-                            <td>
+                            <td id="rentFeeDisplay"><span class="fw-bold text-primary">
                                 <%= data.length> 0 ? data[0].rent_fee : '0' %>
-                            </td>
+                            </span></td>
                         </tr>
                         <tr>
                             <td>ค่าน้ำ</td>
-                            <td>
-                                <%= data.length> 0 ? data[0].water_bill : '0' %>
+                            <td id="waterBillDisplay">
+                                <%= data.length> 0 ? data[0].water_bill : '0' %> บาท
                             </td>
                         </tr>
                         <tr>
                             <td>ค่าไฟ</td>
-                            <td>
-                                <%= data.length> 0 ? data[0].electricity_bill : '0' %>
+                            <td id="electricityBillDisplay">
+                                <%= data.length> 0 ? data[0].electricity_bill : '0' %> บาท
                             </td>
                         </tr>
+                        
+                        
+
                         <tr>
                             <td>ค่าใช้จ่ายเพิ่มเติม</td>
                             <td>
@@ -104,57 +108,54 @@
                 </table>
             </div>
         </div>
+
     </div>
 
     <!-- Include Popup -->
-    <%- include('partials/popup_additional', { bill_id: data.length > 0 ? data[0].bill_id : 'N/A' }) %><%- include('partials/popup_additional', { 
-        bill_id: data.length > 0 ? data[0].bill_id : 'N/A',
-        room_id: data.length > 0 ? data[0].room_id : 'N/A' 
-    }) %>
+    <%- include('partials/popup_additional', { bill_id: data.length> 0 ? data[0].bill_id : 'N/A' }) %><%-
+            include('partials/popup_additional', { bill_id: data.length> 0 ? data[0].bill_id : 'N/A',
+            room_id: data.length > 0 ? data[0].room_id : 'N/A'
+            }) %>
 
-    <%- include('partials/popup_rent_water_elect_bill', { 
-        bill_id: data.length > 0 ? data[0].bill_id : 'N/A',
-        room_id: data.length > 0 ? data[0].room_id : 'N/A' 
-    }) %>
-    
-    
+            <%- include('partials/popup_rent_water_elect_bill', { bill_id: data.length> 0 ? data[0].bill_id : 'N/A',
+                room_id: data.length > 0 ? data[0].room_id : 'N/A'
+                }) %>
+                <script>
+                    function saveExpense() {
+                        let detail = document.getElementById("expenseDetail").value;
+                        let amount = document.getElementById("expenseAmount").value;
 
-        <script>
-            function saveExpense() {
-                let detail = document.getElementById("expenseDetail").value;
-                let amount = document.getElementById("expenseAmount").value;
-
-                if (!detail || amount <= 0) {
-                    alert("กรุณากรอกข้อมูลให้ครบถ้วน และจำนวนเงินต้องมากกว่า 0");
-                    return;
-                }
-
-                let expenseData = {
-                    detail: detail,
-                    amount: parseFloat(amount),
-                    bill_id: "<%= data.length > 0 ? data[0].bill_id : '' %>"
-                };
-
-                fetch('/api/add-expense', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(expenseData)
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert("เพิ่มค่าใช้จ่ายสำเร็จ!");
-                            window.location.reload();
-                        } else {
-                            alert("เกิดข้อผิดพลาด: " + data.message);
+                        if (!detail || amount <= 0) {
+                            alert("กรุณากรอกข้อมูลให้ครบถ้วน และจำนวนเงินต้องมากกว่า 0");
+                            return;
                         }
-                    })
-                    .catch(error => console.error('Error:', error));
-            }
 
-        </script>
+                        let expenseData = {
+                            detail: detail,
+                            amount: parseFloat(amount),
+                            bill_id: "<%= data.length > 0 ? data[0].bill_id : '' %>"
+                        };
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+                        fetch('/api/add-expense', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(expenseData)
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    alert("เพิ่มค่าใช้จ่ายสำเร็จ!");
+                                    window.location.reload();
+                                } else {
+                                    alert("เกิดข้อผิดพลาด: " + data.message);
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }
+
+                </script>
+
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

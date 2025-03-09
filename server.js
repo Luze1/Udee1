@@ -672,6 +672,7 @@ app.get('/add_dorm', (req, res) => {
 });
 
 app.post('/add_dorm_info', upload.array('image'), function (req, res) {
+  // รับข้อมูลจากฟอร์ม
   let formdata = {
     dormitory_name: req.body.dormitory_name,
     contact: req.body.contact,
@@ -689,23 +690,28 @@ app.post('/add_dorm_info', upload.array('image'), function (req, res) {
     bank_account_number: req.body.bank_account_number
   };
 
-  let informationArray = req.body.information || []; // รับข้อมูล information[] จากฟอร์ม
+  // รับข้อมูลสำหรับ dormitory_info (ข้อมูลเพิ่มเติม)
+  let informationArray = req.body.information || [];
 
+  // ดึง dormitory_id ล่าสุดเพื่อสร้าง id ใหม่
   db.get("SELECT dormitory_id FROM dormitory ORDER BY dormitory_id DESC LIMIT 1", (err, row) => {
     if (err) {
-      console.error("Error fetching last dormitory_id:", err);
-      return res.send("Error fetching last dormitory_id.");
+      console.error("Error fetching last dormitory_id:", err.message);
+      return res.send("Error fetching last dormitory_id: " + err.message);
     }
 
     let dormitory_id = 'D001'; // ค่าเริ่มต้น
-    if (row) {
-      let lastId = row.dormitory_id;
-      let lastNumber = parseInt(lastId.replace('D', ''));
+    if (row && row.dormitory_id) {
+      let lastNumber = parseInt(row.dormitory_id.replace('D', ''));
       dormitory_id = `D${(lastNumber + 1).toString().padStart(3, '0')}`;
     }
+    console.log("Generated dormitory_id:", dormitory_id);
+    console.log("Form Data:", formdata);
 
-    let sql = `INSERT INTO dormitory (dormitory_id, dormitory_name, contact, email, monthly_bill_date, bill_due_date, floor_count, dorm_address, province, subdistrict, district, zip_code) 
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
+    // INSERT ข้อมูลหอพักลงในตาราง dormitory
+    let sql = `INSERT INTO dormitory 
+      (dormitory_id, dormitory_name, contact, email, monthly_bill_date, bill_due_date, floor_count, dorm_address, province, subdistrict, district, zip_code) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
 
     db.run(sql, [
       dormitory_id,
@@ -722,13 +728,33 @@ app.post('/add_dorm_info', upload.array('image'), function (req, res) {
       formdata.zip_code
     ], function (err) {
       if (err) {
-        console.error("Error inserting dormitory data:", err);
-        return res.send("Error inserting dormitory data.");
+        console.error("Error inserting dormitory data:", err.message);
+        return res.send("Error inserting dormitory data: " + err.message);
       }
-
       console.log("Dormitory Data Inserted Successfully:", formdata);
 
-      // เพิ่มข้อมูลบัญชีธนาคาร
+      // room table insert ข้อมูล room_id
+      let roomSql = `INSERT INTO room (room_id, dormitory_id, floor_number) VALUES (?, ?, ?);`;
+
+      for (let i = 1; i <= formdata.floor_count; i++) {
+        let roomAmount = req.body[`room_amount_floor_${i}`] || 0;
+
+        for (let j = 1; j <= roomAmount; j++) {
+          let roomId = `R${i}${String(j).padStart(2, '0')}`;
+
+          db.run(roomSql, [roomId, dormitory_id, i], function (err) {
+            if (err) {
+              console.error("Error inserting room data:", err.message);
+            } else {
+              console.log(`Inserted room: ${roomId} on floor ${i}`);
+            }
+          });
+        }
+      }
+
+      res.redirect('/dorm');
+
+      // INSERT ข้อมูลธนาคาร
       let bankSql = `INSERT INTO bank (bank_account_number, bank_account_name, bank_name) VALUES (?, ?, ?);`;
       db.run(bankSql, [
         formdata.bank_account_number,
@@ -736,17 +762,15 @@ app.post('/add_dorm_info', upload.array('image'), function (req, res) {
         formdata.bank_name
       ], function (err) {
         if (err) {
-          console.error("Error inserting bank data:", err);
-          return res.send("Error inserting bank data.");
+          console.error("Error inserting bank data:", err.message);
+          return res.send("Error inserting bank data: " + err.message);
         }
+        console.log("Bank Data Inserted Successfully");
 
-        console.log("Bank Data Inserted Successfully:");
-
-        // เพิ่มข้อมูลสิ่งอำนวยความสะดวก
+        // INSERT ข้อมูลสิ่งอำนวยความสะดวก (facilities)
         const facilities = req.body.facility || [];
         const facilityInserts = [];
         const facilityValues = [];
-
         facilities.forEach(facility => {
           const rawUUID = uuidv4().replace(/-/g, '');
           const facilityID = `FAC-${rawUUID.slice(0, 8)}`;
@@ -754,68 +778,103 @@ app.post('/add_dorm_info', upload.array('image'), function (req, res) {
           facilityValues.push(facilityID, dormitory_id, facility);
         });
 
-        if (facilityInserts.length > 0) {
-          let facilitySql = `INSERT INTO facilities (facilityID, dormitory_id, facility) VALUES ${facilityInserts.join(", ")};`;
+        // ฟังก์ชันหลังจากเสร็จสิ้น dormitory_info จะเรียก insertFloors()
+        function insertDormInfoAndFloors() {
+          // INSERT dormitory_info (รูปภาพและข้อมูลเพิ่มเติม)
+          let dormInfoSql = `INSERT INTO dormitory_info (dormitory_id, dorm_pic, information) VALUES (?, ?, ?);`;
 
-          db.run(facilitySql, facilityValues, function (err) {
-            if (err) {
-              console.error("Error inserting facility data:", err);
-              return res.send("Error inserting facility data.");
-            }
-
-            console.log("Facility Data Inserted Successfully:");
-
-            // เพิ่มข้อมูล dormitory_info พร้อมกับข้อมูล information[]
-            let dormInfoSql = `INSERT INTO dormitory_info (dormitory_id, dorm_pic, information) VALUES (?, ?, ?);`;
-
-            if (req.files && req.files.length > 0) {
-              req.files.forEach((file, index) => {
-                let imageBuffer = file.buffer;
-                let informationText = informationArray[index] || ""; // ดึงข้อมูล information ตามลำดับของรูปภาพ
-
-                db.run(dormInfoSql, [dormitory_id, imageBuffer, informationText], function (err) {
+          // ถ้ามีไฟล์อัปโหลด
+          if (req.files && req.files.length > 0) {
+            let filesProcessed = 0;
+            req.files.forEach((file, index) => {
+              let imageBuffer = file.buffer;
+              let informationText = informationArray[index] || "";
+              db.run(dormInfoSql, [dormitory_id, imageBuffer, informationText], function (err) {
+                if (err) {
+                  console.error("Error inserting dormitory_info data:", err.message);
+                  // ไม่ต้อง return res.send() ทันที เพื่อให้ยังคงประมวลผลไฟล์อื่น ๆ
+                }
+                filesProcessed++;
+                if (filesProcessed === req.files.length) {
+                  // หลังจาก dormitory_info เสร็จสิ้น ให้ INSERT ข้อมูลชั้น
+                  insertFloors();
+                }
+              });
+            });
+          } else {
+            // ถ้าไม่มีไฟล์ แต่มีข้อมูลเพิ่มเติม (informationArray)
+            if (informationArray.length > 0) {
+              let infoProcessed = 0;
+              informationArray.forEach(info => {
+                db.run(dormInfoSql, [dormitory_id, null, info], function (err) {
                   if (err) {
-                    console.error("Error inserting dormitory_info data:", err);
-                    return res.send("Error inserting dormitory_info data.");
+                    console.error("Error inserting dormitory_info data:", err.message);
+                  }
+                  infoProcessed++;
+                  if (infoProcessed === informationArray.length) {
+                    insertFloors();
                   }
                 });
               });
-
-              res.redirect('/dorm');
             } else {
-              // ถ้าไม่มีรูปภาพแต่มี information[] ก็ต้องแทรกข้อมูล
-              if (informationArray.length > 0) {
-                informationArray.forEach(info => {
-                  db.run(dormInfoSql, [dormitory_id, null, info], function (err) {
-                    if (err) {
-                      console.error("Error inserting dormitory_info data:", err);
-                      return res.send("Error inserting dormitory_info data.");
-                    }
-                  });
-                });
-              }
-
-              res.redirect('/dorm');
+              // ถ้าไม่มี dormitory_info เลย
+              insertFloors();
             }
+          }
+        }
+
+        // ฟังก์ชันสำหรับ INSERT ข้อมูลชั้นและจำนวนห้อง
+        function insertFloors() {
+          let floorInserts = [];
+          let floorValues = [];
+          for (let i = 1; i <= formdata.floor_count; i++) {
+            let roomAmount = req.body[`room_amount_floor_${i}`] || 0;
+            floorInserts.push("(?, ?, ?)");
+            floorValues.push(dormitory_id, i, roomAmount);
+          }
+          if (floorInserts.length > 0) {
+            let floorSql = `INSERT INTO dormitory_floors (dormitory_id, floor_number, room_amount) VALUES ${floorInserts.join(", ")};`;
+            db.run(floorSql, floorValues, function (err) {
+              if (err) {
+                console.error("Error inserting dormitory floors:", err.message);
+                return res.send("Error inserting dormitory floors: " + err.message);
+              }
+              console.log("Dormitory Floors Inserted Successfully.");
+              res.redirect('/dorm');
+            });
+          } else {
+            res.redirect('/dorm');
+          }
+        }
+
+        // หากมี facility ให้ INSERT ก่อน dormitory_info
+        if (facilityInserts.length > 0) {
+          let facilitySql = `INSERT INTO facilities (facilityID, dormitory_id, facility) VALUES ${facilityInserts.join(", ")};`;
+          db.run(facilitySql, facilityValues, function (err) {
+            if (err) {
+              console.error("Error inserting facility data:", err.message);
+              return res.send("Error inserting facility data: " + err.message);
+            }
+            console.log("Facility Data Inserted Successfully.");
+            insertDormInfoAndFloors();
           });
         } else {
-          res.redirect('/dorm');
+          // หากไม่มี facility ก็ไปต่อที่ dormitory_info
+          insertDormInfoAndFloors();
         }
       });
     });
   });
 });
 
-
 //End usecase 2  เพิ่มข้อมูลหอพัก--------------------------------------------------------------------------------------------
 
 //Start usecase 1 แจ้งค่าเช่ารายเดือนและบริการอื่นๆ -----------------------------------------------------------------------------------------
-// 🟢 แสดงบิลของแต่ละห้อง
+//แสดงบิลของแต่ละห้อง
 app.get('/bills/:room_id', async (req, res) => {
   try {
     const room_id = req.params.room_id;
 
-    // ✅ ดึงข้อมูลบิลของห้อง
     const billData = await new Promise((resolve, reject) => {
       db.get("SELECT * FROM bill WHERE room_id = ?", [room_id], (err, row) => {
         if (err) return reject(err);
@@ -827,7 +886,6 @@ app.get('/bills/:room_id', async (req, res) => {
       return res.status(404).send("ไม่พบข้อมูลบิล");
     }
 
-    // ✅ ดึงข้อมูลผู้เช่าตามห้อง (จาก tenant table)
     const tenantData = await new Promise((resolve, reject) => {
       db.get(
         "SELECT t.* FROM contract c JOIN room r ON c.room_id = r.room_id JOIN tenant t ON r.tenant_ID = t.tenant_ID WHERE c.room_id = ?",
@@ -844,9 +902,6 @@ app.get('/bills/:room_id', async (req, res) => {
       return res.status(404).send("ไม่พบข้อมูลผู้เช่า");
     }
 
-    console.log("✅ Tenant Data:", tenantData);
-
-    // ✅ คำนวณยอดรวม
     let totalAmount =
       parseFloat(billData.rent_fee) +
       parseFloat(billData.water_bill) +
@@ -854,7 +909,6 @@ app.get('/bills/:room_id', async (req, res) => {
       parseFloat(billData.additional_expenses) +
       parseFloat(billData.fine);
 
-    // ✅ เรนเดอร์หน้า incomplete_bill.ejs พร้อมส่งข้อมูล
     res.render('incomplete_bill', {
       data: [{
         room_id: room_id,
@@ -865,6 +919,8 @@ app.get('/bills/:room_id', async (req, res) => {
         rent_fee: billData.rent_fee,
         water_bill: billData.water_bill,
         electricity_bill: billData.electricity_bill,
+        water_meter: billData.water_meter,  // ✅ เพิ่มค่าน้ำมิเตอร์
+        electricity_meter: billData.electricity_meter, // ✅ เพิ่มค่าไฟมิเตอร์
         additional_expenses: billData.additional_expenses,
         fine: billData.fine,
         totalAmount: totalAmount.toFixed(2)
@@ -877,6 +933,7 @@ app.get('/bills/:room_id', async (req, res) => {
     res.status(500).send("เกิดข้อผิดพลาดในเซิร์ฟเวอร์");
   }
 });
+
 
 //เพิ่มรายการ(ค่าใช้จ่ายเพิ่มเติมในตารางbill)
 app.post('/api/add-expense', async (req, res) => {
@@ -904,49 +961,341 @@ app.post('/api/add-expense', async (req, res) => {
 
 //เพิ่มข้อมูล 1.ค่าเช่า 2.มิเตอร์น้ำ 3.มิเตอร์ไฟ จากตารางbill
 app.post('/api/update-bill', async (req, res) => {
-  const { rent_fee, water_meter, electric_meter, bill_id } = req.body;
+  const { water_meter, electric_meter, bill_id } = req.body;
 
-  if (!rent_fee || !water_meter || !electric_meter || !bill_id) {
-      return res.status(400).json({ success: false, message: "ข้อมูลไม่ครบถ้วน" });
+  if (!water_meter || !electric_meter || !bill_id) {
+    return res.status(400).json({ success: false, message: "ข้อมูลไม่ครบถ้วน" });
   }
 
   try {
-      // ✅ ดึงอัตราค่าน้ำและไฟต่อหน่วยจากตาราง `contract`
-      const contractData = await new Promise((resolve, reject) => {
-          db.get("SELECT water_per_unit, electric_per_unit FROM contract WHERE contract_id = (SELECT contract_id FROM bill WHERE bill_id = ?)", 
-              [bill_id], 
-              (err, row) => {
-                  if (err) return reject(err);
-                  resolve(row);
-              });
+    // ✅ ดึงค่า rent_fee, water_per_unit, electric_per_unit จาก contract
+    const contractData = await new Promise((resolve, reject) => {
+      db.get(`
+              SELECT c.rent_fee, c.water_per_unit, c.electric_per_unit 
+              FROM contract c 
+              JOIN bill b ON c.contract_id = b.contract_id 
+              WHERE b.bill_id = ?
+          `, [bill_id], (err, row) => {
+        if (err) return reject(err);
+        resolve(row);
       });
+    });
 
-      if (!contractData) {
-          return res.status(500).json({ success: false, message: "ไม่พบข้อมูลสัญญาเช่า" });
+    if (!contractData) {
+      return res.status(500).json({ success: false, message: "ไม่พบข้อมูลสัญญาเช่า" });
+    }
+
+    const rent_fee = contractData.rent_fee;
+    const water_per_unit = contractData.water_per_unit;
+    const electric_per_unit = contractData.electric_per_unit;
+
+    // ✅ คำนวณค่าน้ำและค่าไฟ
+    const water_bill = parseFloat(water_meter) * water_per_unit;
+    const electricity_bill = parseFloat(electric_meter) * electric_per_unit;
+
+    // ✅ อัปเดตค่าบิลในตาราง bill
+    db.run("UPDATE bill SET rent_fee = ?, water_bill = ?, electricity_bill = ? WHERE bill_id = ?",
+      [rent_fee, water_bill, electricity_bill, bill_id],
+      (err) => {
+        if (err) {
+          return res.status(500).json({ success: false, message: "เกิดข้อผิดพลาดในการอัปเดตบิล" });
+        }
+        res.json({ success: true, message: "อัปเดตบิลสำเร็จ!" });
       }
-
-      const water_per_unit = contractData.water_per_unit;
-      const electric_per_unit = contractData.electric_per_unit;
-
-      // ✅ คำนวณค่าใช้จ่าย
-      const water_bill = parseFloat(water_meter) * water_per_unit;
-      const electricity_bill = parseFloat(electric_meter) * electric_per_unit;
-
-      // ✅ บันทึกลงตาราง `bill`
-      db.run("UPDATE bill SET rent_fee = ?, water_bill = ?, electricity_bill = ? WHERE bill_id = ?", 
-          [parseFloat(rent_fee), water_bill, electricity_bill, bill_id], 
-          (err) => {
-              if (err) {
-                  return res.status(500).json({ success: false, message: "เกิดข้อผิดพลาดในการอัปเดตบิล" });
-              }
-              res.json({ success: true, message: "อัปเดตบิลสำเร็จ!" });
-          }
-      );
+    );
   } catch (error) {
-      console.error("❌ Error:", error);
-      res.status(500).json({ success: false, message: "เกิดข้อผิดพลาดในเซิร์ฟเวอร์" });
+    console.error("❌ Error:", error);
+    res.status(500).json({ success: false, message: "เกิดข้อผิดพลาดในเซิร์ฟเวอร์" });
   }
 });
+app.get("/api/get-rent-fee/:room_id", (req, res) => {
+  const roomId = req.params.room_id;
+
+  const query = `
+      SELECT c.rent_fee 
+      FROM contract c
+      JOIN room r ON c.room_id = r.room_id
+      WHERE r.room_id = ?
+  `;
+
+  db.get(query, [roomId], (err, row) => {
+    if (err) {
+      console.error("❌ SQL Error:", err.message);
+      return res.status(500).json({ success: false, message: "เกิดข้อผิดพลาดในการดึงค่าเช่า" });
+    }
+
+    if (!row) {
+      return res.status(404).json({ success: false, message: "ไม่พบค่าเช่าสำหรับห้องนี้" });
+    }
+
+    res.json({ success: true, rent_fee: row.rent_fee });
+  });
+});
+
+
+app.get('/edit_dorm/:dormitory_id', function(req, res) {
+  const dormitory_id = req.params.dormitory_id;
+  
+  // ดึงข้อมูลหอพักจากตาราง dormitory
+  const dormQuery = "SELECT * FROM dormitory WHERE dormitory_id = ?";
+  db.get(dormQuery, [dormitory_id], function(err, dormitory) {
+    if (err) {
+      console.error("SQL Error:", err.message);
+      return res.status(500).send("เกิดข้อผิดพลาดในการดึงข้อมูลหอพัก");
+    }
+    if (!dormitory) {
+      return res.status(404).send("ไม่พบข้อมูลหอพัก");
+    }
+    
+    // ดึงข้อมูลจำนวนห้องในแต่ละชั้นจากตาราง dormitory_floors
+    const floorQuery = "SELECT floor_number, room_amount FROM dormitory_floors WHERE dormitory_id = ?";
+    db.all(floorQuery, [dormitory_id], function(err, floors) {
+      if (err) {
+        console.error("SQL Error:", err.message);
+        return res.status(500).send("เกิดข้อผิดพลาดในการดึงข้อมูลชั้น");
+      }
+      // แปลงข้อมูลชั้นให้เป็น object เช่น { 1: 10, 2: 8, ... }
+      let floorData = {};
+      floors.forEach(floor => {
+        floorData[floor.floor_number] = floor.room_amount;
+      });
+      
+      // ดึงข้อมูล facilities จากตาราง facilities
+      const facilityQuery = "SELECT facility FROM facilities WHERE dormitory_id = ?";
+      db.all(facilityQuery, [dormitory_id], function(err, facilities) {
+        if (err) {
+          console.error("SQL Error:", err.message);
+          return res.status(500).send("เกิดข้อผิดพลาดในการดึงข้อมูลสิ่งอำนวยความสะดวก");
+        }
+        let facilityData = facilities.map(row => row.facility);
+        
+        // ดึงข้อมูลเพิ่มเติม (information) จากตาราง dormitory_info
+        const infoQuery = "SELECT information FROM dormitory_info WHERE dormitory_id = ?";
+        db.all(infoQuery, [dormitory_id], function(err, infoRows) {
+          if (err) {
+            console.error("SQL Error:", err.message);
+            return res.status(500).send("เกิดข้อผิดพลาดในการดึงข้อมูลเพิ่มเติม");
+          }
+          let infoData = infoRows.map(row => row.information);
+          
+          // ส่งข้อมูลไปที่เทมเพลต edit_dorm.ejs
+          res.render("edit_dorm", { dormitory, floorData, facilityData, infoData });
+        });
+      });
+    });
+  });
+});
+
+// Route สำหรับแก้ไขข้อมูลหอพัก (แก้ไขข้อมูลในหลายตาราง)
+// ต้องแน่ใจว่าได้ require uuidv4 แล้ว (const { v4: uuidv4 } = require('uuid');)
+// และกำหนด multer configuration (upload.array('image'))
+app.post('/edit_dorm_info', upload.array('image'), function (req, res) {
+  // ดึงข้อมูลจากฟอร์ม
+  let formdata = {
+    dormitory_name: req.body.dormitory_name,
+    contact: req.body.contact,
+    email: req.body.email,
+    monthly_bill_date: req.body.monthly_bill_date,
+    bill_due_date: req.body.bill_due_date,
+    floor_count: req.body.floor_count,
+    dorm_address: req.body.dorm_address,
+    province: req.body.province,
+    subdistrict: req.body.subdistrict,
+    district: req.body.district,
+    zip_code: req.body.zip_code,
+    bank_name: req.body.bank_name,
+    bank_account_name: req.body.bank_account_name,
+    bank_account_number: req.body.bank_account_number
+  };
+  let dormitory_id = req.body.dormitory_id;
+  // หากมีการเปลี่ยนแปลงเลขบัญชีธนาคาร ให้ใช้ original_bank_account_number เป็นตัวระบุ record เดิม
+  let originalBankAccountNumber = req.body.original_bank_account_number || formdata.bank_account_number;
+
+  // 1. Update ข้อมูลหอพักในตาราง dormitory
+  let updateDormSql = `
+    UPDATE dormitory 
+    SET dormitory_name = ?, contact = ?, email = ?, monthly_bill_date = ?, bill_due_date = ?,
+        floor_count = ?, dorm_address = ?, province = ?, subdistrict = ?, district = ?, zip_code = ?
+    WHERE dormitory_id = ?
+  `;
+  db.run(updateDormSql, [
+    formdata.dormitory_name, formdata.contact, formdata.email, formdata.monthly_bill_date,
+    formdata.bill_due_date, formdata.floor_count, formdata.dorm_address, formdata.province,
+    formdata.subdistrict, formdata.district, formdata.zip_code, dormitory_id
+  ], function (err) {
+    if (err) {
+      console.error("Error updating dormitory:", err.message);
+      return res.send("Error updating dormitory: " + err.message);
+    }
+    // 2. Update ข้อมูลธนาคาร (อ้างอิงจากเลขบัญชีเดิม)
+    let updateBankSql = `
+      UPDATE bank 
+      SET bank_account_number = ?, bank_account_name = ?, bank_name = ?
+      WHERE bank_account_number = ?
+    `;
+    db.run(updateBankSql, [
+      formdata.bank_account_number, formdata.bank_account_name, formdata.bank_name,
+      originalBankAccountNumber
+    ], function (err) {
+      if (err) {
+        console.error("Error updating bank:", err.message);
+        return res.send("Error updating bank: " + err.message);
+      }
+      // 3. อัปเดตข้อมูลชั้น (dormitory_floors)
+      db.run(`DELETE FROM dormitory_floors WHERE dormitory_id = ?`, [dormitory_id], function (err) {
+        if (err) {
+          console.error("Error deleting dormitory floors:", err.message);
+          return res.send("Error deleting dormitory floors: " + err.message);
+        }
+        let floorCount = parseInt(formdata.floor_count);
+        let floorInserts = [];
+        let floorValues = [];
+        for (let i = 1; i <= floorCount; i++) {
+          let roomAmount = req.body[`room_amount_floor_${i}`] || 0;
+          floorInserts.push("(?, ?, ?)");
+          floorValues.push(dormitory_id, i, roomAmount);
+        }
+        if (floorInserts.length > 0) {
+          let insertFloorsSql = `
+            INSERT INTO dormitory_floors (dormitory_id, floor_number, room_amount)
+            VALUES ${floorInserts.join(", ")}
+          `;
+          db.run(insertFloorsSql, floorValues, function (err) {
+            if (err) {
+              console.error("Error inserting dormitory floors:", err.message);
+              return res.send("Error inserting dormitory floors: " + err.message);
+            }
+            updateFacilities();
+          });
+        } else {
+          updateFacilities();
+        }
+      });
+    });
+  });
+
+  // ฟังก์ชันสำหรับอัปเดตข้อมูล facilities และ dormitory_info
+  function updateFacilities() {
+    // 4. อัปเดตข้อมูลสิ่งอำนวยความสะดวก (facilities)
+    db.run(`DELETE FROM facilities WHERE dormitory_id = ?`, [dormitory_id], function (err) {
+      if (err) {
+        console.error("Error deleting facilities:", err.message);
+        return res.send("Error deleting facilities: " + err.message);
+      }
+      let facilities = req.body.facility || [];
+      if (!Array.isArray(facilities)) {
+        facilities = [facilities];
+      }
+      let facilityInserts = [];
+      let facilityValues = [];
+      facilities.forEach(function (facility) {
+        let rawUUID = uuidv4().replace(/-/g, '');
+        let facilityID = `FAC-${rawUUID.slice(0, 8)}`;
+        facilityInserts.push("(?, ?, ?)");
+        facilityValues.push(facilityID, dormitory_id, facility);
+      });
+      if (facilityInserts.length > 0) {
+        let insertFacilitiesSql = `
+          INSERT INTO facilities (facilityID, dormitory_id, facility)
+          VALUES ${facilityInserts.join(", ")}
+        `;
+        db.run(insertFacilitiesSql, facilityValues, function (err) {
+          if (err) {
+            console.error("Error inserting facilities:", err.message);
+            return res.send("Error inserting facilities: " + err.message);
+          }
+          updateDormInfo();
+        });
+      } else {
+        updateDormInfo();
+      }
+    });
+  }
+
+  function updateDormInfo() {
+    // 5. อัปเดตข้อมูลเพิ่มเติม (dormitory_info)
+    db.run(`DELETE FROM dormitory_info WHERE dormitory_id = ?`, [dormitory_id], function (err) {
+      if (err) {
+        console.error("Error deleting dormitory_info:", err.message);
+        return res.send("Error deleting dormitory_info: " + err.message);
+      }
+      let informationArray = req.body.information || [];
+      let dormInfoSql = `
+        INSERT INTO dormitory_info (dormitory_id, dorm_pic, information)
+        VALUES (?, ?, ?)
+      `;
+      if (req.files && req.files.length > 0) {
+        let filesProcessed = 0;
+        req.files.forEach((file, index) => {
+          let imageBuffer = file.buffer;
+          let informationText = informationArray[index] || "";
+          db.run(dormInfoSql, [dormitory_id, imageBuffer, informationText], function (err) {
+            if (err) {
+              console.error("Error inserting dormitory_info:", err.message);
+            }
+            filesProcessed++;
+            if (filesProcessed === req.files.length) {
+              res.redirect('/dorm');
+            }
+          });
+        });
+      } else if (informationArray.length > 0) {
+        let infoProcessed = 0;
+        informationArray.forEach(info => {
+          db.run(dormInfoSql, [dormitory_id, null, info], function (err) {
+            if (err) {
+              console.error("Error inserting dormitory_info:", err.message);
+            }
+            infoProcessed++;
+            if (infoProcessed === informationArray.length) {
+              res.redirect('/dorm');
+            }
+          });
+        });
+      } else {
+        res.redirect('/dorm');
+      }
+    });
+  }
+});
+
+// Route สำหรับลบข้อมูลหอพัก (delete_dorm_info)
+// ลบข้อมูลในตารางที่เกี่ยวข้องก่อน แล้วจึงลบข้อมูลหอพักในตาราง dormitory
+app.post('/delete_dorm_info', function (req, res) {
+  let dormitory_id = req.body.dormitory_id;
+  db.run(`DELETE FROM dormitory_info WHERE dormitory_id = ?`, [dormitory_id], function (err) {
+    if (err) {
+      console.error("Error deleting dormitory_info:", err.message);
+      return res.send("Error deleting dormitory_info: " + err.message);
+    }
+    db.run(`DELETE FROM facilities WHERE dormitory_id = ?`, [dormitory_id], function (err) {
+      if (err) {
+        console.error("Error deleting facilities:", err.message);
+        return res.send("Error deleting facilities: " + err.message);
+      }
+      db.run(`DELETE FROM dormitory_floors WHERE dormitory_id = ?`, [dormitory_id], function (err) {
+        if (err) {
+          console.error("Error deleting dormitory_floors:", err.message);
+          return res.send("Error deleting dormitory_floors: " + err.message);
+        }
+        db.run(`DELETE FROM room WHERE dormitory_id = ?`, [dormitory_id], function (err) {
+          if (err) {
+            console.error("Error deleting room data:", err.message);
+            return res.send("Error deleting room data: " + err.message);
+          }
+          db.run(`DELETE FROM dormitory WHERE dormitory_id = ?`, [dormitory_id], function (err) {
+            if (err) {
+              console.error("Error deleting dormitory:", err.message);
+              return res.send("Error deleting dormitory: " + err.message);
+            }
+            res.redirect('/dorm');
+          });
+        });
+      });
+    });
+  });
+});
+
 
 //End usecase 1 แจ้งค่าเช่ารายเดือนและบริการอื่นๆ ------------------------------------------------------------------------------------
 

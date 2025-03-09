@@ -104,11 +104,13 @@
             object-fit: cover;
         }
 
-        .facility-container, .information-container {
+        .facility-container,
+        .information-container {
             margin-bottom: 5px;
         }
 
-        .facility-input, .information-input {
+        .facility-input,
+        .information-input {
             padding: 10px;
             margin-bottom: 5px;
             font-weight: 400;
@@ -229,7 +231,7 @@
                         <div class="form-item">
                             <label for="total-floors">จำนวนชั้น</label>
                             <input type="number" name="floor_count" pattern="^[0-9]\d*$" id="total-floors" value="1"
-                                required>
+                                min="0" required>
                         </div>
                     </div>
 
@@ -343,8 +345,8 @@
                         </div>
                         <div class="form-item">
                             <label for="zipcode">รหัสไปรษณีย์</label>
-                            <input type="text" maxlength="5" name="zip_code" id="zipcode"
-                                placeholder="รหัสไปรษณีย์" required>
+                            <input type="text" maxlength="5" name="zip_code" id="zipcode" placeholder="รหัสไปรษณีย์"
+                                required>
                         </div>
                     </div>
                     <h3 style="border-radius: 6px;background: #E0F2F2; width: 8%;text-align: center; color: #8CB9BD;">
@@ -361,19 +363,7 @@
                             <option value="6">ธนาคารไทยพาณิชย์</option>
                             <option value="7">ธนาคารกรุงศรีอยุธยา</option>
                             <option value="8">ธนาคารออมสิน</option>
-                            <option value="9">ธนาคารอาคารสงเคราะห์</option>
-                            <option value="10">ธนาคารเพื่อการเกษตรและสหกรณ์การเกษตร</option>
-                            <option value="11">ธนาคารธนชาต</option>
-                            <option value="12">ธนาคารเกียรตินาคิน</option>
-                            <option value="13">ธนาคารซีไอเอ็มบีไทย</option>
-                            <option value="14">ธนาคารอิสลามแห่งประเทศไทย</option>
-                            <option value="15">ธนาคารทิสโก้</option>
-                            <option value="16">ธนาคารยูโอบี</option>
-                            <option value="17">ธนาคารแลนด์ แอนด์ เฮาส์</option>
-                            <option value="18">ธนาคารไอซีบีซี (ไทย)</option>
-                            <option value="19">ธนาคารไทยเครดิต</option>
                         </select>
-
                     </div>
                     <div class="form-group">
                         <div class="form-item">
@@ -383,8 +373,8 @@
                         </div>
                         <div class="form-item">
                             <label for="bank_account_number">เลขที่บัญชี</label>
-                            <input type="text" name="bank_account_number" id="bank_account_number" 
-                                maxlength="17" placeholder="เลขที่บัญชีธนาคาร" required>
+                            <input type="text" name="bank_account_number" id="bank_account_number" maxlength="17"
+                                placeholder="เลขที่บัญชีธนาคาร" required>
                         </div>
                     </div>
                     <h3 style="border-radius: 6px;background: #FFE8C6; width: 12%;text-align: center; color: #ECB159;">
@@ -446,6 +436,7 @@
                     input.id = `floor-${i}`;
                     input.value = 0;
                     input.required = true;
+                    input.min = 0;
 
                     formItem.appendChild(label);
                     formItem.appendChild(input);
@@ -522,6 +513,7 @@
             }
             // End add information line 345 -------------------------------------------------------------------
         </script>
+
 </body>
 
 </html>

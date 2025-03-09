@@ -1,9 +1,11 @@
 <!-- views/partials/popup_rent_water_elect_bill.ejs -->
-<div class="modal fade" id="addRentWaterElectModal" tabindex="-1" aria-labelledby="addRentWaterElectModalLabel" aria-hidden="true">
+<div class="modal fade" id="addRentWaterElectModal" tabindex="-1" aria-labelledby="addRentWaterElectModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addRentWaterElectModalLabel">บันทึกค่าน้ำ/ค่าไฟ (ห้อง <%= typeof room_id !== 'undefined' ? room_id : 'N/A' %>)</h5>
+                <h5 class="modal-title" id="addRentWaterElectModalLabel">บันทึกค่าน้ำ/ค่าไฟ (ห้อง <%= typeof room_id
+                    !=='undefined' ? room_id : 'N/A' %>)</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -12,8 +14,8 @@
                 </div>
                 <form id="rentWaterElectForm">
                     <div class="mb-3">
-                        <label for="rentFee" class="form-label">ค่าเช่า (บาท)</label>
-                        <input type="number" class="form-control" id="rentFee" required min="0">
+                        <label class="form-label">ค่าเช่า (บาท)</label>
+                        <span id="rentFeeDisplay" class="fw-bold text-primary"><%= data.length> 0 ? data[0].rent_fee : '0' %></span>
                     </div>
                     <div class="mb-3">
                         <label for="waterMeter" class="form-label">เลขมิเตอร์น้ำ (หน่วย)</label>
@@ -34,21 +36,40 @@
 </div>
 
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var modal = document.getElementById("addRentWaterElectModal");
+
+        modal.addEventListener("show.bs.modal", function () {
+            fetch(`/api/get-rent-fee/<%= room_id %>`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById("rentFeeDisplay").innerText = data.rent_fee.toFixed(2) + " บาท";
+                    } else {
+                        document.getElementById("rentFeeDisplay").innerText = "ไม่พบข้อมูล";
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error fetching rent fee:', error);
+                    document.getElementById("rentFeeDisplay").innerText = "โหลดค่าเช่าไม่ได้";
+                });
+        });
+    });
+
     function saveRentWaterElect() {
-        let rentFee = document.getElementById("rentFee").value;
         let waterMeter = document.getElementById("waterMeter").value;
         let electricMeter = document.getElementById("electricMeter").value;
+        let billId = "<%= data.length > 0 ? data[0].bill_id : '' %>";
 
-        if (!rentFee || !waterMeter || !electricMeter || rentFee < 0 || waterMeter < 0 || electricMeter < 0) {
-            alert("กรุณากรอกข้อมูลให้ครบถ้วน และจำนวนต้องไม่ติดลบ");
+        if (!waterMeter || !electricMeter || waterMeter < 0 || electricMeter < 0) {
+            alert("กรุณากรอกค่ามิเตอร์ให้ถูกต้อง");
             return;
         }
 
         let billData = {
-            rent_fee: parseFloat(rentFee),
             water_meter: parseFloat(waterMeter),
             electric_meter: parseFloat(electricMeter),
-            bill_id: "<%= data.length > 0 ? data[0].bill_id : '' %>"
+            bill_id: billId
         };
 
         fetch('/api/update-bill', {
@@ -59,12 +80,38 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert("อัปเดตค่าเช่า ค่าน้ำ ค่าไฟ สำเร็จ!");
-                window.location.reload();
+                alert("อัปเดตค่ามิเตอร์สำเร็จ!");
+                window.location.reload(); // รีโหลดหน้าหลังอัปเดต
             } else {
                 alert("เกิดข้อผิดพลาด: " + data.message);
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('❌ Error:', error);
+            alert("เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์");
+        });
     }
+
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var modal = document.getElementById("addRentWaterElectModal");
+
+        modal.addEventListener("show.bs.modal", function () {
+            fetch(`/api/get-rent-fee/<%= room_id %>`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById("rentFeeDisplay").innerText = data.rent_fee.toFixed(2) + " บาท";
+                    } else {
+                        document.getElementById("rentFeeDisplay").innerText = "ไม่พบข้อมูล";
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error fetching rent fee:', error);
+                    document.getElementById("rentFeeDisplay").innerText = "โหลดค่าเช่าไม่ได้";
+                });
+        });
+    });
 </script>
